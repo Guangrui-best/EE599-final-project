@@ -939,49 +939,46 @@ double TrojanMap::TSP_helper(std::vector<std::vector<double>> &adjMatrix, std::v
   return result;
 }
 
-std::pair<double, std::vector<std::vector<std::string>>> TravellingTrojan_2opt(
-      std::vector<std::string> &location_ids){
+
+std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravellingTrojan_2opt(
+                                    std::vector<std::string> &location_ids) {
   
   std::pair<double, std::vector<std::vector<std::string>>> results;
+  std::vector<std::vector<std::string>> path;
+  path.push_back(location_ids);
   std::vector<std::string> curr_path(location_ids);
-  std::vector<std::string> newPath;
-  std::vector<std::vector<std::string>> results_path;
-  curr_path.push_back(location_ids[0]);
-  results_path.push_back(curr_path);
-  bool improve_flag = false;
-  int size = curr_path.size();
-  double newCost;
-  double bestCost = 0.0;
+  std::vector<std::string> new_path;
+  bool flag = false;
+  double min_cost = CalculatePathLength(location_ids);
+  double Cost;
+  int size = location_ids.size();
   do{
-    newCost = 0.0;
-    improve_flag = false;
-    bestCost = CalculatePathLength(curr_path);
+    flag = false;
     for(int i = 1; i < size - 1; i++){
-      for(int k = i + 1; k < size; k++){
-        newPath = twoOptSwap(curr_path, i, k);
-        newCost = CalculatePathLength(newPath);
-        if(newCost < bestCost){
-          curr_path = newPath;
-          bestCost = newCost;
-          results_path.push_back(curr_path);
-          improve_flag = true;
+      for(int j = i + 1; j < size; j++){
+        new_path = twoOptSwap(curr_path, i, j);
+        Cost = CalculatePathLength(new_path);
+        if(Cost < min_cost){
+          min_cost = Cost;
+          curr_path = new_path;
+          path.push_back(curr_path);
+          flag = true;
+          j = size;
           i = size - 1;
-          k = size;
         }
       }
     }
-  } while(improve_flag = true);
+  } while (flag == true);
 
-  results = std::make_pair(bestCost, results_path);
+  results = std::make_pair(min_cost, path);
   return results;
 }
 
-std::vector<std::string> TrojanMap::twoOptSwap(std::vector<std::string> curr_path, int i, int k){
-  std::vector<std::string>newPath(curr_path);
-  std::reverse(newPath.begin() + i, newPath.begin() + k);
-  return newPath;;
+std::vector<std::string> TrojanMap::twoOptSwap(const std::vector<std::string> &curr_path, int i, int j){
+  std::vector<std::string> new_path(curr_path);
+  std::reverse(new_path.begin() + i, new_path.begin() + j);
+  return new_path;
 }
-
 /**
  * Cycle Detection: Given four points of the square-shape subgraph, return true if there
  * is a cycle path inside the square, false otherwise.
