@@ -173,7 +173,8 @@ void TrojanMap::PrintMenu() {
     PlotPoints(locations);
     std::cout << "Calculating ..." << std::endl;
     auto start = std::chrono::high_resolution_clock::now();
-    auto results = TravellingTrojan(locations);
+    // auto results = TravellingTrojan(locations);
+    auto results = TravellingTrojan_2opt(locations);
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     CreateAnimation(results.second);
@@ -481,7 +482,7 @@ void TrojanMap::PlotPointsOrder(std::vector<std::string> &location_ids) {
  * @param  {std::vector<std::vector<std::string>>} path_progress : the progress to get the path
  */
 void TrojanMap::CreateAnimation(std::vector<std::vector<std::string>> path_progress){
-  cv::VideoWriter video("src/lib/output.avi", cv::VideoWriter::fourcc('M','J','P','G'), 10, cv::Size(1248,992));
+  cv::VideoWriter video("src/lib/output001.avi", cv::VideoWriter::fourcc('M','J','P','G'), 10, cv::Size(1248,992));
   for(auto location_ids: path_progress) {
     std::string image_path = cv::samples::findFile("src/lib/input.jpg");
     cv::Mat img = cv::imread(image_path, cv::IMREAD_COLOR);
@@ -776,13 +777,13 @@ std::vector<std::string> TrojanMap::CalculateShortestPath_Bellman_Ford(
   for(iter = data.begin(); iter != data.end(); iter++){
     shortest_dist[iter->first] = DBL_MAX;
   }
-  shortest_dist[start.id] = 0;
-  for(int k = 1; k < shortest_dist.size(); k++){
-    for(auto v_pair: shortest_dist){
-      std::string v_id = v_pair.first;
-      for (std::string u_id: GetNeighborIDs(v_id)){
-        if(shortest_dist[u_id] == DBL_MAX) 
-          continue;   // avoid many meaningless calculations
+  shortest_dist[start.id] = 0.0;
+  int size = shortest_dist.size();
+  for(int k = 1; k < size; k++){
+    for(auto v_pair = shortest_dist.begin(); v_pair != shortest_dist.end(); v_pair++){
+      std::string v_id = v_pair->first;
+      std::vector<std::string> us_id = GetNeighborIDs(v_id);
+      for (std::string u_id: us_id){
         Node u = data[u_id];
         Node v = data[v_id];
         if(shortest_dist[v_id] > shortest_dist[u_id] + CalculateDistance(u, v)){
@@ -792,7 +793,7 @@ std::vector<std::string> TrojanMap::CalculateShortestPath_Bellman_Ford(
       }
     }
   }
-  if(shortest_dist[end.id] = DBL_MAX){
+  if(shortest_dist[end.id] == DBL_MAX){
     return path;
   }
   path.push_back(end.id);
@@ -874,19 +875,19 @@ std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravellingTr
   for(auto id: location_ids){
     int2str[idx++] = id;
   }
-
   // construct adjacent matrix
   int size = location_ids.size();
+  adjMatrix = std::vector<std::vector<double>>(size, std::vector<double>(size, 0.0));
   for(int i = 0; i < size; i++){
     for (int j = 0; j < size; j++){
       if(i != j){
         adjMatrix[i][j] = CalculateDistance(data[location_ids[i]], data[location_ids[j]]);
+        adjMatrix[j][i] = CalculateDistance(data[location_ids[i]], data[location_ids[j]]);
       }
     }
   }
   double min_cost = DBL_MAX;
-  double res = TSP_helper(adjMatrix, results_idx, location_idx, location_idx[0], location_idx[0], 
-        min_cost, 0.0, path);
+  double res = TSP_helper(adjMatrix, results_idx, location_idx, location_idx[0], location_idx[0], min_cost, 0.0, path);
 
   std::vector<std::vector<std::string>> results_str;
   std::vector<std::string> result_str;
@@ -897,6 +898,13 @@ std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravellingTr
     results_str.push_back(result_str);
     result_str.clear();
   }
+  // for(auto rr:results_idx){
+  //   for(auto r: rr){
+  //     std::cout << r << std::endl;
+  //   }
+  // }
+  // std::cout << res << std::endl;
+  // exit(1);
   results = std::make_pair(res, results_str);
   return results;
 }
@@ -904,10 +912,10 @@ std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravellingTr
 // TSP helper
 double TrojanMap::TSP_helper(std::vector<std::vector<double>> &adjMatrix, std::vector<std::vector<int>> &results_idx,
       std::vector<int> &location_idx, int start, int curr, double &min_cost, 
-      double curr_cost, std::vector<int> &path){
+      double curr_cost, std::vector<int> path){
   
-  double result = DBL_MAX;
   path.push_back(curr);
+  double result = DBL_MAX;
 
   if(path.size() == location_idx.size()){
     double cost = curr_cost + adjMatrix[curr][start];
@@ -916,23 +924,62 @@ double TrojanMap::TSP_helper(std::vector<std::vector<double>> &adjMatrix, std::v
       std::vector<int>tmp(path);
       tmp.push_back(start);
       results_idx.push_back(tmp);
+      // std::cout << results_idx.size() << std::endl;
     }
     return cost;
   }
   for(int i = 0; i < location_idx.size(); i++){
     if(i != curr && std::find(path.begin(), path.end(), i) == path.end()){
       if(curr_cost < min_cost){
-        result = TSP_helper(adjMatrix, results_idx, location_idx, start, i, min_cost, curr_cost + adjMatrix[curr][i], path);
+        result = std::min(result, TSP_helper(adjMatrix, results_idx, location_idx, start, i, min_cost, curr_cost + adjMatrix[curr][i], path));
       }
     }
   }
+  // std::cout << results_idx.size() << std::endl;
   return result;
 }
 
 std::pair<double, std::vector<std::vector<std::string>>> TravellingTrojan_2opt(
       std::vector<std::string> &location_ids){
+  
   std::pair<double, std::vector<std::vector<std::string>>> results;
+  std::vector<std::string> curr_path(location_ids);
+  std::vector<std::string> newPath;
+  std::vector<std::vector<std::string>> results_path;
+  curr_path.push_back(location_ids[0]);
+  results_path.push_back(curr_path);
+  bool improve_flag = false;
+  int size = curr_path.size();
+  double newCost;
+  double bestCost = 0.0;
+  do{
+    newCost = 0.0;
+    improve_flag = false;
+    bestCost = CalculatePathLength(curr_path);
+    for(int i = 1; i < size - 1; i++){
+      for(int k = i + 1; k < size; k++){
+        newPath = twoOptSwap(curr_path, i, k);
+        newCost = CalculatePathLength(newPath);
+        if(newCost < bestCost){
+          curr_path = newPath;
+          bestCost = newCost;
+          results_path.push_back(curr_path);
+          improve_flag = true;
+          i = size - 1;
+          k = size;
+        }
+      }
+    }
+  } while(improve_flag = true);
+
+  results = std::make_pair(bestCost, results_path);
   return results;
+}
+
+std::vector<std::string> TrojanMap::twoOptSwap(std::vector<std::string> curr_path, int i, int k){
+  std::vector<std::string>newPath(curr_path);
+  std::reverse(newPath.begin() + i, newPath.begin() + k);
+  return newPath;;
 }
 
 /**
