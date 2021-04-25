@@ -22,6 +22,7 @@
 #include <unordered_set>
 #include <stack>
 #include <chrono>
+#include <set>
 
 #include "opencv2/core.hpp"
 #include "opencv2/highgui.hpp"
@@ -129,6 +130,7 @@ void TrojanMap::PrintMenu() {
     getline(std::cin, input2);
     auto start = std::chrono::high_resolution_clock::now();
     auto results = CalculateShortestPath_Dijkstra(input1, input2);
+    // auto results = CalculateShortestPath_Bellman_Ford(input1, input2);
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     menu = "*************************Results******************************\n";
@@ -528,7 +530,7 @@ std::pair<double, double> TrojanMap::GetPlotLocation(double lat, double lon) {
  * @return {double}         : latitude
  */
 double TrojanMap::GetLat(std::string id) {
-    return -1;
+    return data[id].lat;
 }
 
 
@@ -539,7 +541,7 @@ double TrojanMap::GetLat(std::string id) {
  * @return {double}         : longitude
  */
 double TrojanMap::GetLon(std::string id) { 
-    return -1;
+    return data[id].lon;
 }
 
 /**
@@ -549,7 +551,7 @@ double TrojanMap::GetLon(std::string id) {
  * @return {std::string}    : name
  */
 std::string TrojanMap::GetName(std::string id) { 
-    return "";
+    return data[id].name;
 }
 
 /**
@@ -559,7 +561,7 @@ std::string TrojanMap::GetName(std::string id) {
  * @return {std::vector<std::string>}  : neighbor ids
  */
 std::vector<std::string> TrojanMap::GetNeighborIDs(std::string id) {
-    return {};
+    return data[id].neighbors;
 }
 
 /**
@@ -595,6 +597,9 @@ double TrojanMap::CalculateDistance(const Node &a, const Node &b) {
  */
 double TrojanMap::CalculatePathLength(const std::vector<std::string> &path) {
   double sum = 0;
+  for (int i = 0; i < path.size() - 1; i++){
+    sum += CalculateDistance(data[path[i]], data[path[i + 1]]);
+  }
   return sum;
 }
 
@@ -607,6 +612,16 @@ double TrojanMap::CalculatePathLength(const std::vector<std::string> &path) {
  */
 std::vector<std::string> TrojanMap::Autocomplete(std::string name){
   std::vector<std::string> results;
+  std::transform(name.begin(), name.end(), name.begin(), tolower);
+  std::map<std::string, Node>::iterator iter;
+  for(iter = data.begin(); iter != data.end(); iter++){
+    Node node = iter->second;
+    std::string node_name = node.name;
+    std::transform(node_name.begin(), node_name.end(), node_name.begin(), tolower);
+    if(node_name.substr(0, name.length()) == name){
+      results.push_back(node.name);
+    }
+  }
   return results;
 }
 
@@ -618,6 +633,15 @@ std::vector<std::string> TrojanMap::Autocomplete(std::string name){
  */
 std::pair<double, double> TrojanMap::GetPosition(std::string name) {
   std::pair<double, double> results(-1, -1);
+  std::map<std::string, Node>::iterator iter;
+  for (iter = data.begin(); iter != data.end(); iter++){
+    Node node = iter->second; 
+    if (node.name == name){
+      results.first = GetLat(node.id);
+      results.second = GetLon(node.id);
+      break;
+    }
+  }
   return results;
 }
 
@@ -629,7 +653,14 @@ std::pair<double, double> TrojanMap::GetPosition(std::string name) {
  */
 Node TrojanMap::GetNode(std::string name) {
   Node n;
-  n.id = "";
+  // n.id = "";
+  std::map<std::string, Node>::iterator iter;
+  for (iter = data.begin(); iter != data.end(); iter++){
+    if (iter->second.name == name){
+      // n.id = iter->second.id;
+      n = iter->second;
+    }
+  }
   return n;
 }
 
@@ -643,7 +674,85 @@ Node TrojanMap::GetNode(std::string name) {
  */
 std::vector<std::string> TrojanMap::CalculateShortestPath_Dijkstra(
     std::string location1_name, std::string location2_name) {
+  
   std::vector<std::string> path;
+  std::set<std::string> IsVisited;
+  std::map<std::string, double> shortest_distance;
+  std::map<std::string, std::string> path_helper;
+  
+  Node start = GetNode(location1_name);
+  Node end = GetNode(location2_name);
+  
+  if(data.find(start.id) == data.end() || data.find(end.id) == data.end()){
+    return path;
+  }
+
+  if(GetNeighborIDs(end.id).size() == 0){
+    return path;
+  }
+
+  IsVisited.insert(start.id);
+
+  // initialize
+  std::map<std::string, Node>::iterator iter;
+  std::vector<std::string> neighbors = GetNeighborIDs(start.id);
+  double distance = 0.0;
+  shortest_distance[start.id] = 0.0;
+  for (iter = data.begin(); iter != data.end(); iter++){
+    Node tmp = iter->second;
+    if (std::find(neighbors.begin(), neighbors.end(), tmp.id) == neighbors.end()){
+      // not the start node's neighbor
+      shortest_distance[tmp.id] = DBL_MAX;    
+      continue;
+    }
+    shortest_distance[tmp.id] = CalculateDistance(start, tmp);
+    path_helper[tmp.id] = start.id;
+  }
+
+  while(1){
+    double pre_min = DBL_MAX;
+    std::string visited = "";
+    // find the location which is not visited and is the nearest one to source node.
+    for (auto i: shortest_distance){
+      std::string id = i.first;
+      double distance = i.second;
+      if (IsVisited.find(id) == IsVisited.end() && distance < pre_min){
+          pre_min = distance;
+          visited = id;
+      }
+    }
+    IsVisited.insert(visited);
+    if (visited == end.id) {
+      break;
+    }
+    if (visited == ""){
+      break;
+    }
+    
+    std::vector<std::string> neighbors = GetNeighborIDs(visited);
+    for (std::string neighbor_id: neighbors){
+      if (IsVisited.find(neighbor_id) == IsVisited.end()){   //haven't been visited
+        Node neighbor = data[neighbor_id];
+        distance = CalculateDistance(neighbor, data[visited]);
+        if(pre_min + distance < shortest_distance[neighbor_id]){
+          shortest_distance[neighbor_id] = pre_min + distance;
+          // update its parent node
+          path_helper[neighbor_id] = visited;
+        }
+      }
+    }
+  }
+  if (shortest_distance[end.id] == DBL_MAX){
+    return path;
+  }
+  path.push_back(end.id);
+  std::string parent_node = path_helper[end.id];
+  while (parent_node != start.id){
+    path.push_back(parent_node);
+    parent_node = path_helper[parent_node];
+  }
+  path.push_back(start.id);
+  std::reverse(path.begin(), path.end());
   return path;
 }
 
@@ -657,7 +766,43 @@ std::vector<std::string> TrojanMap::CalculateShortestPath_Dijkstra(
  */
 std::vector<std::string> TrojanMap::CalculateShortestPath_Bellman_Ford(
     std::string location1_name, std::string location2_name){
+  
   std::vector<std::string> path;
+  std::map<std::string, std::string> path_helper;
+  std::map<std::string, double> shortest_dist;
+  Node start = GetNode(location1_name);
+  Node end = GetNode(location2_name);
+  std::map<std::string, Node>::iterator iter;
+  for(iter = data.begin(); iter != data.end(); iter++){
+    shortest_dist[iter->first] = DBL_MAX;
+  }
+  shortest_dist[start.id] = 0;
+  for(int k = 1; k < shortest_dist.size(); k++){
+    for(auto v_pair: shortest_dist){
+      std::string v_id = v_pair.first;
+      for (std::string u_id: GetNeighborIDs(v_id)){
+        if(shortest_dist[u_id] == DBL_MAX) 
+          continue;   // avoid many meaningless calculations
+        Node u = data[u_id];
+        Node v = data[v_id];
+        if(shortest_dist[v_id] > shortest_dist[u_id] + CalculateDistance(u, v)){
+          shortest_dist[v_id] = shortest_dist[u_id] + CalculateDistance(u, v);
+          path_helper[v_id] = u_id;
+        }
+      }
+    }
+  }
+  if(shortest_dist[end.id] = DBL_MAX){
+    return path;
+  }
+  path.push_back(end.id);
+  std::string parent_node = path_helper[end.id];
+  while (parent_node != start.id){
+    path.push_back(parent_node);
+    parent_node = path_helper[parent_node];
+  }
+  path.push_back(start.id);
+  std::reverse(path.begin(), path.end());
   return path;
 }
 
@@ -708,8 +853,80 @@ std::vector<std::string> TrojanMap::DeliveringTrojan(std::vector<std::string> &l
  */
 std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravellingTrojan(
                                     std::vector<std::string> &location_ids) {
+  
   std::pair<double, std::vector<std::vector<std::string>>> results;
+  std::vector<int> path;
+  std::vector<std::vector<int>> results_idx;
+  std::vector<std::vector<double>> adjMatrix;
+  std::map<std::string, int> str2int;
+  std::map<int, std::string> int2str;
+  std::vector<int> location_idx;
+  
+  int idx = 0;
+  for(auto id: location_ids){
+    str2int[id] = idx++;
+  }
+  for (auto id: location_ids){
+    location_idx.push_back(str2int[id]);
+  }
+
+  idx = 0;
+  for(auto id: location_ids){
+    int2str[idx++] = id;
+  }
+
+  // construct adjacent matrix
+  int size = location_ids.size();
+  for(int i = 0; i < size; i++){
+    for (int j = 0; j < size; j++){
+      if(i != j){
+        adjMatrix[i][j] = CalculateDistance(data[location_ids[i]], data[location_ids[j]]);
+      }
+    }
+  }
+  double min_cost = DBL_MAX;
+  double res = TSP_helper(adjMatrix, results_idx, location_idx, location_idx[0], location_idx[0], 
+        min_cost, 0.0, path);
+
+  std::vector<std::vector<std::string>> results_str;
+  std::vector<std::string> result_str;
+  for(auto m: results_idx){
+    for(auto n: m){
+      result_str.push_back(int2str[n]);
+    }
+    results_str.push_back(result_str);
+    result_str.clear();
+  }
+  results = std::make_pair(res, results_str);
   return results;
+}
+
+// TSP helper
+double TrojanMap::TSP_helper(std::vector<std::vector<double>> &adjMatrix, std::vector<std::vector<int>> &results_idx,
+      std::vector<int> &location_idx, int start, int curr, double &min_cost, 
+      double curr_cost, std::vector<int> &path){
+  
+  double result = DBL_MAX;
+  path.push_back(curr);
+
+  if(path.size() == location_idx.size()){
+    double cost = curr_cost + adjMatrix[curr][start];
+    if(cost < min_cost){
+      min_cost = cost;
+      std::vector<int>tmp(path);
+      tmp.push_back(start);
+      results_idx.push_back(tmp);
+    }
+    return cost;
+  }
+  for(int i = 0; i < location_idx.size(); i++){
+    if(i != curr && std::find(path.begin(), path.end(), i) == path.end()){
+      if(curr_cost < min_cost){
+        result = TSP_helper(adjMatrix, results_idx, location_idx, start, i, min_cost, curr_cost + adjMatrix[curr][i], path);
+      }
+    }
+  }
+  return result;
 }
 
 std::pair<double, std::vector<std::vector<std::string>>> TravellingTrojan_2opt(
