@@ -12,6 +12,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <queue>
+#include <deque>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -472,6 +473,7 @@ void TrojanMap::PlotPointsOrder(std::vector<std::string> &location_ids) {
              cv::Point(int(end.first), int(end.second)), cv::Scalar(0, 255, 0),
              LINE_WIDTH);
   }
+  cv::startWindowThread();
   cv::imshow("TrojanMap", img);
   cv::waitKey(1);
 }
@@ -817,6 +819,21 @@ std::vector<std::string> TrojanMap::CalculateShortestPath_Bellman_Ford(
  */
 std::vector<std::string> TrojanMap::ReadLocationsFromCSVFile(std::string locations_filename){
   std::vector<std::string> location_names_from_csv;
+  std::string path = "input/" + locations_filename;
+  std::fstream fin;
+  fin.open("input/topologicalsort_locations.csv", std::ios::in);
+  std::string line;
+  std::string word;
+  getline(fin, line);
+  std::cout << line << std::endl;
+  getline(fin, line);
+  std::cout << line << std::endl;std::cout << line << std::endl;
+  while(getline(fin, line)){
+    std::cout << line << std::endl;
+    line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
+    line.erase(std::remove(line.begin(), line.end(), ','), line.end());
+    location_names_from_csv.push_back(line);
+  }
   return location_names_from_csv;
 }
 
@@ -829,6 +846,23 @@ std::vector<std::string> TrojanMap::ReadLocationsFromCSVFile(std::string locatio
  */
 std::vector<std::vector<std::string>> TrojanMap::ReadDependenciesFromCSVFile(std::string dependencies_filename){
   std::vector<std::vector<std::string>> dependencies_from_csv;
+  std::fstream fin;
+  std::string path = "input/" + dependencies_filename;
+  fin.open("input/topologicalsort_dependencies.csv", std::ios::in);
+  std::string line;
+  std::string word;
+  getline(fin, line);
+  getline(fin, line);
+  std::vector<std::string> temp;
+  while(getline(fin, line)){
+    std::stringstream s(line);
+    while(getline(s, word, ',')){
+      word.erase(std::remove(word.begin(), word.end(), ' '), word.end());
+      temp.push_back(word);
+    }
+    dependencies_from_csv.push_back(temp);
+    temp.clear(); 
+  }
   return dependencies_from_csv;
 }
 
@@ -843,6 +877,36 @@ std::vector<std::vector<std::string>> TrojanMap::ReadDependenciesFromCSVFile(std
 std::vector<std::string> TrojanMap::DeliveringTrojan(std::vector<std::string> &locations,
                                                      std::vector<std::vector<std::string>> &dependencies){
   std::vector<std::string> result;
+  std::unordered_map<std::string, std::vector<std::string>> adjMatrix;
+  std::unordered_map<std::string, int> indegrees;
+
+  std::deque<std::string> dq;
+  for(auto location: locations){
+    std::vector<std::string>temp;
+    adjMatrix[location] = temp;
+    indegrees[location] = 0;
+  }
+
+  for(auto dependency:dependencies){
+    adjMatrix[dependency[0]].push_back(dependency[1]);
+    indegrees[dependency[1]]++;
+  }
+  for (auto it = indegrees.begin(); it != indegrees.end(); it++){
+    if(it->second == 0){
+      dq.push_back(it->first);
+    }
+  }
+  while (!dq.empty()){
+    std::string node = dq.front();
+    dq.pop_front();
+    result.push_back(node);
+    for(std::string child: adjMatrix[node]){
+      indegrees[child]--;
+      if(indegrees[child] == 0){
+        dq.push_back(child);
+      }
+    }
+  }
   return result;                                                     
 }
 
@@ -1000,7 +1064,7 @@ bool TrojanMap::CycleDetection(std::vector<double> &square) {
       map_predecessor[iter->first] = "";
     }
   }
-  std::cout << visited.size() << std::endl;
+  // std::cout << visited.size() << std::endl;
   for(auto it = visited.begin(); it != visited.end(); it++){
     std::string current_id = it->first;
     if(!visited[current_id]){
@@ -1015,11 +1079,11 @@ bool TrojanMap::CycleDetection(std::vector<double> &square) {
           parent_id = map_predecessor[parent_id];
         }
         location_ids.push_back(start);
-        // std::reverse(location_ids.begin(), location_ids.end());
+        std::reverse(location_ids.begin(), location_ids.end());
         // for(auto l: location_ids){
         //   std::cout << l << std::endl;
         // }
-        // PlotPointsandEdges(location_ids, square);
+        PlotPointsandEdges(location_ids, square);
         // PlotPath(location_ids);
         return true;
       }
