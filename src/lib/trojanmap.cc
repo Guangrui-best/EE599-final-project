@@ -442,6 +442,7 @@ void TrojanMap::PlotPointsandEdges(std::vector<std::string> &location_ids, std::
               LINE_WIDTH);
     }
   }
+  std::startWindowThread();
   cv::imshow("TrojanMap", img);
   cv::waitKey(1);
 }
@@ -898,13 +899,6 @@ std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravellingTr
     results_str.push_back(result_str);
     result_str.clear();
   }
-  // for(auto rr:results_idx){
-  //   for(auto r: rr){
-  //     std::cout << r << std::endl;
-  //   }
-  // }
-  // std::cout << res << std::endl;
-  // exit(1);
   results = std::make_pair(res, results_str);
   return results;
 }
@@ -987,5 +981,66 @@ std::vector<std::string> TrojanMap::twoOptSwap(const std::vector<std::string> &c
  * @return {bool}: whether there is a cycle or not
  */
 bool TrojanMap::CycleDetection(std::vector<double> &square) {
+  double left = square[0];
+  double right = square[1];
+  double upper = square[2];
+  double lower = square[3];
+  std::map<std::string, bool> visited;
+  std::map<std::string, Node>::iterator iter;
+  bool has_cycle = false;
+  std::map<std::string, std::string> map_predecessor;
+  std::vector<std::string> location_ids;
+  for(iter = data.begin(); iter != data.end(); iter++){
+    double lat = GetLat(iter->first);
+    double lon = GetLon(iter->first);
+    if(lat >= left && lat <= right && lon <= upper && lon >= lower) {
+      visited[iter->first] = false;
+    }
+  }
+  for(auto it = visited.begin(); it != visited.end(); it++){
+    map_predecessor[it->first] = "";
+  }
+  for(auto it = visited.begin(); it != visited.end(); it++){
+    std::string current_id = it->first;
+    if(!visited[current_id]){
+      std::string start = current_id;
+      has_cycle = hasCycle(start, current_id, visited, map_predecessor[current_id], square, map_predecessor);
+      if (has_cycle){
+        location_ids.push_back(start);
+        std::string parent_id = map_predecessor[start];
+        while(parent_id != current_id){
+          location_ids.push_back(parent_id);
+          parent_id = map_predecessor[parent_id];
+        }
+        location_ids.push_back(start);
+        std::reverse(location_ids.begin(), location_ids.end());
+        PlotPointsandEdges(location_ids, square);
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+bool TrojanMap::hasCycle(std::string &start, std::string current_id, std::map<std::string, bool>&visited, std::string parent_id, std::vector<double>&square, std::map<std::string, std::string> &map_predecessor){
+  visited[current_id] = true;
+  map_predecessor[current_id] = parent_id;
+  std::vector<std::string> neighbors = GetNeighborIDs(current_id);
+  for(std::string neighbor: neighbors){
+    double lat = GetLat(neighbor);
+    double lon = GetLon(neighbor);
+    if(lat >= left && lat <= right && lon <= upper && lon >= lower){
+      if(!visited[neighbor]){
+        return hasCycle(neighbor, visited, current_id, square, map_predecessor);
+      }
+      else{
+        if (map_predecessor[neighbor] != current_id){
+          map_predecessor[neighbor] = current_id;
+          start = current_id;
+          return true;
+        }
+      }
+    }
+  }
   return false;
 }
