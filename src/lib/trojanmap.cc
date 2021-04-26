@@ -442,7 +442,7 @@ void TrojanMap::PlotPointsandEdges(std::vector<std::string> &location_ids, std::
               LINE_WIDTH);
     }
   }
-  std::startWindowThread();
+  cv::startWindowThread();
   cv::imshow("TrojanMap", img);
   cv::waitKey(1);
 }
