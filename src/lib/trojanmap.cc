@@ -342,6 +342,7 @@ void TrojanMap::CreateGraphFromCSVFile() {
     data[n.id] = n;
   }
   fin.close();
+  fin.clear();
 }
 
 /**
@@ -819,17 +820,23 @@ std::vector<std::string> TrojanMap::CalculateShortestPath_Bellman_Ford(
  */
 std::vector<std::string> TrojanMap::ReadLocationsFromCSVFile(std::string locations_filename){
   std::vector<std::string> location_names_from_csv;
-  std::fstream fin;
-  fin.open(locations_filename, std::ios::in);
+  std::string path = "/home/guangrui/ee599_c++/final-project-Guangrui-best/input/" + locations_filename;
+
+  std::ifstream fin(path);
+  if(!fin.is_open()) {
+    fprintf(stderr, "Error opening locations file!");
+    exit(1);
+  }
   std::string line, word;
-  getline(fin, line);
-  while(getline(fin, line)){
+  std::getline(fin, line);
+  while(std::getline(fin, line)){
     std::stringstream s(line);
-    while (getline(s, word, ',')){
+    while (std::getline(s, word, ',')){
       location_names_from_csv.push_back(word);
     }
   }
   fin.close();
+  fin.clear();
   return location_names_from_csv;
 }
 
@@ -842,19 +849,25 @@ std::vector<std::string> TrojanMap::ReadLocationsFromCSVFile(std::string locatio
  */
 std::vector<std::vector<std::string>> TrojanMap::ReadDependenciesFromCSVFile(std::string dependencies_filename){
   std::vector<std::vector<std::string>> dependencies_from_csv;
-  std::fstream fin;
-  fin.open(dependencies_filename, std::ios::in);
+  std::ifstream fin;
+  std::string path = "/home/guangrui/ee599_c++/final-project-Guangrui-best/input/" + dependencies_filename;
+  fin.open(path, std::ios::in);
+  if(!fin.is_open()) {
+    fprintf(stderr, "Error opening dependencies file!");
+    exit(1);
+  }
   std::string line, word;
-  getline(fin, line);
-  while(getline(fin, line)){
+  std::getline(fin, line);
+  while(std::getline(fin, line)){
     std::vector<std::string> temp;
     std::stringstream s(line);
-    while(getline(s, word, ',')){
+    while(std::getline(s, word, ',')){
       temp.push_back(word);
     }
     dependencies_from_csv.push_back(temp);
   }
   fin.close();
+  fin.clear();
   return dependencies_from_csv;
 }
 
