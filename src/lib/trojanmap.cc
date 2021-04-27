@@ -821,13 +821,15 @@ std::vector<std::string> TrojanMap::ReadLocationsFromCSVFile(std::string locatio
   std::vector<std::string> location_names_from_csv;
   std::fstream fin;
   fin.open(locations_filename, std::ios::in);
-  std::string line;
+  std::string line, word;
   getline(fin, line);
   while(getline(fin, line)){
-    line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
-    line.erase(std::remove(line.begin(), line.end(), ','), line.end());
-    location_names_from_csv.push_back(line);
+    std::stringstream s(line);
+    while (getline(s, word, ',')){
+      location_names_from_csv.push_back(word);
+    }
   }
+  fin.close();
   return location_names_from_csv;
 }
 
@@ -842,19 +844,17 @@ std::vector<std::vector<std::string>> TrojanMap::ReadDependenciesFromCSVFile(std
   std::vector<std::vector<std::string>> dependencies_from_csv;
   std::fstream fin;
   fin.open(dependencies_filename, std::ios::in);
-  std::string line;
-  std::string word;
+  std::string line, word;
   getline(fin, line);
-  std::vector<std::string> temp;
   while(getline(fin, line)){
+    std::vector<std::string> temp;
     std::stringstream s(line);
     while(getline(s, word, ',')){
-      word.erase(std::remove(word.begin(), word.end(), ' '), word.end());
       temp.push_back(word);
     }
     dependencies_from_csv.push_back(temp);
-    temp.clear(); 
   }
+  fin.close();
   return dependencies_from_csv;
 }
 
