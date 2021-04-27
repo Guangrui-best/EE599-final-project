@@ -24,6 +24,7 @@
 #include <stack>
 #include <chrono>
 #include <set>
+#include <cstdlib>
 
 #include "opencv2/core.hpp"
 #include "opencv2/highgui.hpp"
@@ -174,9 +175,10 @@ void TrojanMap::PrintMenu() {
     PlotPoints(locations);
     std::cout << "Calculating ..." << std::endl;
     auto start = std::chrono::high_resolution_clock::now();
-    // auto results = TravellingTrojan(locations);
+    auto results = TravellingTrojan(locations);
     // auto results = TravellingTrojan_2opt(locations);
-    auto results = TravellingTrojan_3opt(locations);
+    // auto results = TravellingTrojan_3opt(locations);
+    // auto results = TravellingTrojan_genetic(locations);
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     CreateAnimation(results.second);
@@ -1009,17 +1011,18 @@ std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravellingTr
   
   std::pair<double, std::vector<std::vector<std::string>>> results;
   std::vector<std::vector<std::string>> path;
-  path.push_back(location_ids);
   std::vector<std::string> curr_path(location_ids);
+  curr_path.push_back(location_ids[0]);
+  path.push_back(curr_path);
   std::vector<std::string> new_path;
   bool flag = false;
-  double min_cost = CalculatePathLength(location_ids);
+  double min_cost = CalculatePathLength(curr_path);
   double Cost;
-  int size = location_ids.size();
+  int size = curr_path.size();
   do{
     flag = false;
-    for(int i = 1; i <= size - 1; i++){
-      for(int j = i + 1; j <= size; j++){
+    for(int i = 1; i < size - 1; i++){
+      for(int j = i + 1; j < size; j++){
         new_path = twoOptSwap(curr_path, i, j);
         Cost = CalculatePathLength(new_path);
         if(Cost < min_cost){
@@ -1027,8 +1030,8 @@ std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravellingTr
           curr_path = new_path;
           path.push_back(curr_path);
           flag = true;
-          j = size + 1;
-          i = size;
+          j = size;
+          i = size - 1;
         }
       }
     }
@@ -1049,18 +1052,19 @@ std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravellingTr
   
   std::pair<double, std::vector<std::vector<std::string>>> results;
   std::vector<std::vector<std::string>> path;
-  path.push_back(location_ids);
   std::vector<std::string> curr_path(location_ids);
+  curr_path.push_back(location_ids[0]);
+  path.push_back(curr_path);
   std::vector<std::string> new_path1, new_path2;
   bool flag = false;
-  double min_cost = CalculatePathLength(location_ids);
+  double min_cost = CalculatePathLength(curr_path);
   double Cost;
-  int size = location_ids.size();
+  int size = curr_path.size();
   do{
     flag = false;
-    for(int i = 1; i <= size - 2; i++){
-      for(int j = i + 1; j <= size - 1; j++){
-        for(int k = j + 1; k <= size; k++){
+    for(int i = 1; i < size - 2; i++){
+      for(int j = i + 1; j < size - 1; j++){
+        for(int k = j + 1; k < size; k++){
           new_path1 = threeOptSwap1(curr_path, i, j, k);
           new_path2 = threeOptSwap2(curr_path, i, j, k);
           Cost = CalculatePathLength(new_path1);
@@ -1069,9 +1073,9 @@ std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravellingTr
             curr_path = new_path1;
             path.push_back(curr_path);
             flag = true;
-            k = size + 1;
-            j = size;
-            i = size - 1;
+            k = size;
+            j = size - 1;
+            i = size - 2;
           }
           Cost = CalculatePathLength(new_path2);
           if(Cost < min_cost){
@@ -1079,9 +1083,9 @@ std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravellingTr
             curr_path = new_path2;
             path.push_back(curr_path);
             flag = true;
-            k = size + 1;
-            j = size;
-            i = size - 1;
+            k = size;
+            j = size - 1;
+            i = size - 2;
           }
         }
       }
@@ -1104,6 +1108,123 @@ std::vector<std::string> TrojanMap::threeOptSwap2(const std::vector<std::string>
   std::reverse(new_path.begin() + i, new_path.begin() + k);
   std::reverse(new_path.begin() + i, new_path.begin() + j);
   return new_path;
+}
+
+std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravellingTrojan_genetic(
+                                    std::vector<std::string> &location_ids){
+  std::pair<double, std::vector<std::vector<std::string>>> results;
+  std::vector<int> path;
+  std::vector<std::vector<int>> results_idx;
+  std::vector<std::vector<double>> adjMatrix;
+  std::map<std::string, int> str2int;
+  std::map<int, std::string> int2str;
+  std::vector<int> location_idx;
+  
+  int idx = 0;
+  for(auto id: location_ids){
+    str2int[id] = idx++;
+  }
+  for (auto id: location_ids){
+    location_idx.push_back(str2int[id]);
+  }
+
+  idx = 0;
+  for(auto id: location_ids){
+    int2str[idx++] = id;
+  }
+  // construct adjacent matrix
+  int size = location_ids.size();
+  adjMatrix = std::vector<std::vector<double>>(size, std::vector<double>(size, 0.0));
+  for(int i = 0; i < size; i++){
+    for (int j = 0; j < size; j++){
+      if(i != j){
+        adjMatrix[i][j] = CalculateDistance(data[location_ids[i]], data[location_ids[j]]);
+        adjMatrix[j][i] = CalculateDistance(data[location_ids[i]], data[location_ids[j]]);
+      }
+    }
+  }
+  double min_cost = DBL_MAX;
+  double cost;
+  int randTimes = rand_num(1, size);   // random integer from [1, size)
+  for (int i = 0; i <= randTimes; i++){
+    path = get_random_path(size);
+    cost = adjust_path(path, adjMatrix);
+    if (cost < min_cost){
+      results_idx.push_back(path);
+      min_cost = cost;
+    }
+  }
+  std::vector<std::vector<std::string>> results_str;
+  std::vector<std::string> result_str;
+  for(auto m: results_idx){
+    for(auto n: m){
+      result_str.push_back(int2str[n]);
+    }
+    results_str.push_back(result_str);
+    result_str.clear();
+  }
+  results = std::make_pair(min_cost, results_str);
+  return results;
+}
+
+int TrojanMap::rand_num(int start, int end){
+  int r = end - start;
+  int rrnum = start + rand() % r;
+  return rrnum;
+}
+
+std::vector<int> TrojanMap::get_random_path(int n){
+  std::vector<int> path;
+  for(int i = 0; i < n; i++){
+    path.push_back(i);
+  }
+  path.push_back(0);
+  for(int i = 2; i < n; i++){
+    int j = rand_num(1, i);
+    int tmp = path[i];
+    path[i] = path[j];
+    path[j] = tmp;
+  }
+  return path;
+}
+
+double TrojanMap::adjust_path(std::vector<int> &path, std::vector<std::vector<double>> &adjMatrix){
+  int n = adjMatrix.size();
+  bool adjusted = true;
+  while(adjusted){
+    adjusted = false;
+    for(int i = 1; i < n; i++){
+      for(int j = i + 1; j < n; j++){
+        if (can_swap(path, i, j, adjMatrix)){
+          int tmp = path[i];
+          path[i] = path[j];
+          path[j] = tmp;
+          adjusted = true;
+        }
+      }
+    }
+  }
+  double cost = 0.0;
+  for(int i = 1; i < n + 1; i++){
+    cost += adjMatrix[path[i - 1]][path[i]];
+  }
+  return cost;
+}
+
+bool TrojanMap::can_swap(std::vector<int> &path, int i, int j, std::vector<std::vector<double>> &adjMatrix){
+  double before = adjacent_cost(path, i, path[i], adjMatrix);
+  before += adjacent_cost(path, j, path[j], adjMatrix);
+  double after = adjacent_cost(path, i, path[j], adjMatrix);
+  after += adjacent_cost(path, j, path[i], adjMatrix);
+  return before > after;
+}
+
+double TrojanMap::adjacent_cost(std::vector<int> &path, int i, int j, std::vector<std::vector<double>> &adjMatrix){
+  double cost = adjMatrix[i - 1][j];
+  if (i + 1 < adjMatrix.size() + 1){
+    cost += adjMatrix[j][path[i + 1]];
+  }
+  return cost;
 }
 /**
  * Cycle Detection: Given four points of the square-shape subgraph, return true if there

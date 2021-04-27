@@ -133,6 +133,16 @@ class TrojanMap {
   std::vector<std::string> twoOptSwap(const std::vector<std::string> &curr_path, int i, int j);
   std::vector<std::string> threeOptSwap1(const std::vector<std::string> &curr_path, int i, int j, int k);
   std::vector<std::string> threeOptSwap2(const std::vector<std::string> &curr_path, int i, int j, int k);
+  
+  std::pair<double, std::vector<std::vector<std::string>>> TravellingTrojan_genetic(
+      std::vector<std::string> &location_ids);
+  int rand_num(int start, int end);
+  std::vector<int> get_random_path(int n);
+  double adjust_path(std::vector<int> &path, std::vector<std::vector<double>> &adjMatrix);
+  bool can_swap(std::vector<int> &path, int i, int j, std::vector<std::vector<double>> &adjMatrix);
+  double adjacent_cost(std::vector<int> &path, int i, int j, std::vector<std::vector<double>> &adjMatrix);
+  
+
   // Given a subgraph specified by a square-shape area, determine whether there is a
   // cycle or not in this subgraph.
   // vector square has 4 elements: left/right/top/bottom bound in order.
