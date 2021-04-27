@@ -821,15 +821,10 @@ std::vector<std::string> TrojanMap::ReadLocationsFromCSVFile(std::string locatio
   std::vector<std::string> location_names_from_csv;
   std::string path = "input/" + locations_filename;
   std::fstream fin;
-  fin.open("input/topologicalsort_locations.csv", std::ios::in);
+  fin.open("topological_locations.csv", std::ios::in);
   std::string line;
-  std::string word;
   getline(fin, line);
-  std::cout << line << std::endl;
-  getline(fin, line);
-  std::cout << line << std::endl;std::cout << line << std::endl;
   while(getline(fin, line)){
-    std::cout << line << std::endl;
     line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
     line.erase(std::remove(line.begin(), line.end(), ','), line.end());
     location_names_from_csv.push_back(line);
@@ -848,10 +843,9 @@ std::vector<std::vector<std::string>> TrojanMap::ReadDependenciesFromCSVFile(std
   std::vector<std::vector<std::string>> dependencies_from_csv;
   std::fstream fin;
   std::string path = "input/" + dependencies_filename;
-  fin.open("input/topologicalsort_dependencies.csv", std::ios::in);
+  fin.open("topologicalsort_dependencies.csv", std::ios::in);
   std::string line;
   std::string word;
-  getline(fin, line);
   getline(fin, line);
   std::vector<std::string> temp;
   while(getline(fin, line)){
