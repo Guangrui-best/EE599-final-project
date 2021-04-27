@@ -817,11 +817,10 @@ std::vector<std::string> TrojanMap::CalculateShortestPath_Bellman_Ford(
  * @param  {std::string} locations_filename     : locations_filename
  * @return {std::vector<std::string>}           : locations 
  */
-std::vector<std::string> TrojanMap::ReadLocationsFromCSVFile(std::string locations_filename){
+std::vector<std::string> ReadLocationsFromCSVFile(std::string locations_filename){
   std::vector<std::string> location_names_from_csv;
-  std::string path = "input/" + locations_filename;
   std::fstream fin;
-  fin.open("topological_locations.csv", std::ios::in);
+  fin.open(locations_filename, std::ios::in);
   std::string line;
   getline(fin, line);
   while(getline(fin, line)){
@@ -839,11 +838,10 @@ std::vector<std::string> TrojanMap::ReadLocationsFromCSVFile(std::string locatio
  * @param  {std::string} dependencies_filename     : dependencies_filename
  * @return {std::vector<std::vector<std::string>>} : dependencies
  */
-std::vector<std::vector<std::string>> TrojanMap::ReadDependenciesFromCSVFile(std::string dependencies_filename){
+std::vector<std::vector<std::string>> ReadDependenciesFromCSVFile(std::string dependencies_filename){
   std::vector<std::vector<std::string>> dependencies_from_csv;
   std::fstream fin;
-  std::string path = "input/" + dependencies_filename;
-  fin.open("topologicalsort_dependencies.csv", std::ios::in);
+  fin.open(dependencies_filename, std::ios::in);
   std::string line;
   std::string word;
   getline(fin, line);
