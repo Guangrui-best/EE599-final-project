@@ -817,7 +817,7 @@ std::vector<std::string> TrojanMap::CalculateShortestPath_Bellman_Ford(
  * @param  {std::string} locations_filename     : locations_filename
  * @return {std::vector<std::string>}           : locations 
  */
-std::vector<std::string> ReadLocationsFromCSVFile(std::string locations_filename){
+std::vector<std::string> TrojanMap::ReadLocationsFromCSVFile(std::string locations_filename){
   std::vector<std::string> location_names_from_csv;
   std::fstream fin;
   fin.open(locations_filename, std::ios::in);
@@ -838,7 +838,7 @@ std::vector<std::string> ReadLocationsFromCSVFile(std::string locations_filename
  * @param  {std::string} dependencies_filename     : dependencies_filename
  * @return {std::vector<std::vector<std::string>>} : dependencies
  */
-std::vector<std::vector<std::string>> ReadDependenciesFromCSVFile(std::string dependencies_filename){
+std::vector<std::vector<std::string>> TrojanMap::ReadDependenciesFromCSVFile(std::string dependencies_filename){
   std::vector<std::vector<std::string>> dependencies_from_csv;
   std::fstream fin;
   fin.open(dependencies_filename, std::ios::in);
