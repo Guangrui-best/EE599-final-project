@@ -175,7 +175,8 @@ void TrojanMap::PrintMenu() {
     std::cout << "Calculating ..." << std::endl;
     auto start = std::chrono::high_resolution_clock::now();
     // auto results = TravellingTrojan(locations);
-    auto results = TravellingTrojan_2opt(locations);
+    // auto results = TravellingTrojan_2opt(locations);
+    auto results = TravellingTrojan_3opt(locations);
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     CreateAnimation(results.second);
@@ -1017,8 +1018,8 @@ std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravellingTr
   int size = location_ids.size();
   do{
     flag = false;
-    for(int i = 1; i < size - 1; i++){
-      for(int j = i + 1; j < size; j++){
+    for(int i = 1; i <= size - 1; i++){
+      for(int j = i + 1; j <= size; j++){
         new_path = twoOptSwap(curr_path, i, j);
         Cost = CalculatePathLength(new_path);
         if(Cost < min_cost){
@@ -1026,8 +1027,8 @@ std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravellingTr
           curr_path = new_path;
           path.push_back(curr_path);
           flag = true;
-          j = size;
-          i = size - 1;
+          j = size + 1;
+          i = size;
         }
       }
     }
@@ -1039,6 +1040,68 @@ std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravellingTr
 
 std::vector<std::string> TrojanMap::twoOptSwap(const std::vector<std::string> &curr_path, int i, int j){
   std::vector<std::string> new_path(curr_path);
+  std::reverse(new_path.begin() + i, new_path.begin() + j);
+  return new_path;
+}
+
+std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravellingTrojan_3opt(
+      std::vector<std::string> &location_ids){
+  
+  std::pair<double, std::vector<std::vector<std::string>>> results;
+  std::vector<std::vector<std::string>> path;
+  path.push_back(location_ids);
+  std::vector<std::string> curr_path(location_ids);
+  std::vector<std::string> new_path1, new_path2;
+  bool flag = false;
+  double min_cost = CalculatePathLength(location_ids);
+  double Cost;
+  int size = location_ids.size();
+  do{
+    flag = false;
+    for(int i = 1; i <= size - 2; i++){
+      for(int j = i + 1; j <= size - 1; j++){
+        for(int k = j + 1; k <= size; k++){
+          new_path1 = threeOptSwap1(curr_path, i, j, k);
+          new_path2 = threeOptSwap2(curr_path, i, j, k);
+          Cost = CalculatePathLength(new_path1);
+          if(Cost < min_cost){
+            min_cost = Cost;
+            curr_path = new_path1;
+            path.push_back(curr_path);
+            flag = true;
+            k = size + 1;
+            j = size;
+            i = size - 1;
+          }
+          Cost = CalculatePathLength(new_path2);
+          if(Cost < min_cost){
+            min_cost = Cost;
+            curr_path = new_path2;
+            path.push_back(curr_path);
+            flag = true;
+            k = size + 1;
+            j = size;
+            i = size - 1;
+          }
+        }
+      }
+    }
+  } while (flag == true);
+  results = std::make_pair(min_cost, path);
+  return results;
+}
+
+std::vector<std::string> TrojanMap::threeOptSwap1(const std::vector<std::string> &curr_path, int i, int j, int k){
+  std::vector<std::string> new_path(curr_path);
+  std::reverse(new_path.begin() + i, new_path.begin() + k);
+  std::reverse(new_path.begin() + i, new_path.begin() + j);
+  std::reverse(new_path.begin() + j, new_path.begin() + k);
+  return new_path;
+}
+
+std::vector<std::string> TrojanMap::threeOptSwap2(const std::vector<std::string> &curr_path, int i, int j, int k){
+  std::vector<std::string> new_path(curr_path);
+  std::reverse(new_path.begin() + i, new_path.begin() + k);
   std::reverse(new_path.begin() + i, new_path.begin() + j);
   return new_path;
 }
