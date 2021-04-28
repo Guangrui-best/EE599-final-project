@@ -1,8 +1,6 @@
 # EE599 TrojanMap Project
-
 ## Step 1: Autocomplete the location name
 ### Functions:
-
 ```c++
 std::vector<std::string> Autocomplete(std::string name);
 ```
