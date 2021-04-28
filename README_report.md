@@ -1,7 +1,6 @@
 # EE599 TrojanMap Project
 
 ## Step 1: Autocomplete the location name
-
 ### Functions:
 
 ```c++
