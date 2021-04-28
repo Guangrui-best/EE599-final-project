@@ -175,10 +175,10 @@ void TrojanMap::PrintMenu() {
     PlotPoints(locations);
     std::cout << "Calculating ..." << std::endl;
     auto start = std::chrono::high_resolution_clock::now();
-    auto results = TravellingTrojan(locations);
+    // auto results = TravellingTrojan(locations);
     // auto results = TravellingTrojan_2opt(locations);
     // auto results = TravellingTrojan_3opt(locations);
-    // auto results = TravellingTrojan_genetic(locations);
+    auto results = TravellingTrojan_genetic(locations);
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     CreateAnimation(results.second);
@@ -1134,7 +1134,7 @@ std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravellingTr
   }
   // construct adjacent matrix
   int size = location_ids.size();
-  adjMatrix = std::vector<std::vector<double>>(size, std::vector<double>(size, 0.0));
+  adjMatrix = std::vector<std::vector<double>>(size, std::vector<double>(size, DBL_MAX));
   for(int i = 0; i < size; i++){
     for (int j = 0; j < size; j++){
       if(i != j){
@@ -1163,6 +1163,7 @@ std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravellingTr
     results_str.push_back(result_str);
     result_str.clear();
   }
+  // std::cout << results_str.size() << std::endl;
   results = std::make_pair(min_cost, results_str);
   return results;
 }
@@ -1180,7 +1181,7 @@ std::vector<int> TrojanMap::get_random_path(int n){
   }
   path.push_back(0);
   for(int i = 2; i < n; i++){
-    int j = rand_num(1, i);
+    int j = rand_num(1, i + 1);
     int tmp = path[i];
     path[i] = path[j];
     path[j] = tmp;
@@ -1220,8 +1221,8 @@ bool TrojanMap::can_swap(std::vector<int> &path, int i, int j, std::vector<std::
 }
 
 double TrojanMap::adjacent_cost(std::vector<int> &path, int i, int j, std::vector<std::vector<double>> &adjMatrix){
-  double cost = adjMatrix[i - 1][j];
-  if (i + 1 < adjMatrix.size() + 1){
+  double cost = adjMatrix[path[i - 1]][j];
+  if (i + 1 < path.size()){
     cost += adjMatrix[j][path[i + 1]];
   }
   return cost;
