@@ -26,6 +26,9 @@ double GetLon(std::string id);
 ```
 - Given location's id, return its longitude.
 - Time Complexity: O(1).
+### Implementation
+<p align="center"><img src="img/GetPosition.png" alt="Trojan" width="500" /></p>
+<p align="center"><img src="img/GetPosition_map.png" alt="Trojan" width="500" /></p>
 
 ## Step 3: CalculateShortestPath between two places
 ### Functions:
@@ -46,6 +49,13 @@ std::vector<std::string> GetNeighborIDs(std::string id);
 ```
 - Given the location's name, return its neighbors.
 - Time Complexity: O(1).
+### Implementation
+#### Dijkstra
+<p align="center"><img src="img/Dijkstra.png" alt="Trojan" width="500" /></p>
+<p align="center"><img src="img/Calculate_Shortest_Path.png" alt="Trojan" width="500" /></p>
+#### Bellman-Ford
+<p align="center"><img src="img/Bellman-Ford.png" alt="Trojan" width="500" /></p>
+<p align="center"><img src="img/Calculate_Shortest_Path.png" alt="Trojan" width="500" /></p>
 
 ## Step 4: The Travelling Trojan Problem (AKA Traveling Salesman!)
 ### Functions
