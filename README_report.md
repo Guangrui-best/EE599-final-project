@@ -96,7 +96,9 @@ std::pair<double, std::vector<std::vector<std::string>>> TravellingTrojan_geneti
 int rand_num(int start, int end);
 ```
 - Return a random integer from [start, end).
-- Time Complexity: O(1);
+
+- Time Complexity: O(1).
+
 ```c++
 std::vector<int> TrojanMap::get_random_path(int n);
 ```
