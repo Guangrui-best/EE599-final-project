@@ -1,4 +1,22 @@
 # EE599 TrojanMap Project
+## Data Structure
+```c++
+class Node {
+  public:
+    Node(){};
+    Node(const Node &n){id = n.id; lat = n.lat; lon = n.lon; name = n.name; neighbors = n.neighbors;};
+    std::string id;    // A unique id assign to each point
+    double lat;        // Latitude
+    double lon;        // Longitude
+    std::string name;  // Name of the location. E.g. "Bank of America".
+    std::vector<std::string> neighbors;  // List of the ids of all neighbor points.
+};
+
+class TrojanMap {
+ public:
+   // A map of ids to Nodes.
+  std::map<std::string, Node> data;
+```
 ## Step 1: Autocomplete the location name
 ### Function:
 ```c++
@@ -31,6 +49,8 @@ double GetLon(std::string id);
 <p align="center"><img src="img/GetPosition_map.png" alt="Trojan" width="500" /></p>
 
 ## Step 3: CalculateShortestPath between two places
+### Design
+
 ### Functions:
 ```c++
 std::vector<std::string> CalculateShortestPath_Dijkstra(std::string &location1_name,
