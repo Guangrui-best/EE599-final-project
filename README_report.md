@@ -18,12 +18,12 @@ std::pair<double, double> GetPosition(std::string name);
 double GetLat(std::string id);
 ```
 - Given location's id, return its latitude.
-- Time Complexity: O(1)
+- Time Complexity: O(1).
 ```c++
 double GetLon(std::string id);
 ```
-- Given location's id, return its longitude
-- Time Complexity: O(1)
+- Given location's id, return its longitude.
+- Time Complexity: O(1).
 
 ## Step 3: CalculateShortestPath between two places
 ### Functions:
@@ -43,7 +43,7 @@ std::vector<std::string> CalculateShortestPath_Bellman_Ford(std::string &locatio
 std::vector<std::string> GetNeighborIDs(std::string id);
 ```
 - Given the location's name, return its neighbors.
-- Time Complexity: O(1)
+- Time Complexity: O(1).
 
 ### The Travelling Trojan Problem (AKA Traveling Salesman!)
 ## Functions
@@ -51,8 +51,8 @@ std::vector<std::string> GetNeighborIDs(std::string id);
 std::pair<double, std::vector<std::vector<std::string>>> TravellingTrojan(
       std::vector<std::string> &location_ids);
 ```
-- Create an adjacent matrix with row and columns be locations reindexed id. Perform DFS to try all permutations of the path and find the minimum cost. Return the minimum cost and the corresponding path.
-- Time Complexity: O(n!), where n is the number of nodes in the input
+- Create an adjacent matrix with row and columns to be locations reindexed id. Perform DFS to try all permutations of the path and find the minimum cost. For each time when we get a better path, we will push back this path to our final result. Return the minimum cost and the result vector.
+- Time Complexity: O(n!), where n is the number of nodes in the input.
 ```c++
 double TSP_helper(std::vector<std::vector<double>> &adjMatrix, std::vector<std::vector<int>> &results_idx,
       std::vector<int> &location_idx, int start, int curr, double &min_cost, 
@@ -63,4 +63,40 @@ double TSP_helper(std::vector<std::vector<double>> &adjMatrix, std::vector<std::
 ```c++
 std::pair<double, std::vector<std::vector<std::string>>> TravellingTrojan_2opt(
                                     std::vector<std::string> &location_ids);
+```
+- Use two for loops to obtain a sub part in location ids vector and reverse this sub part. If the updated vector's path length is smaller, we update things like Brute Force one and back to start again. Repeat until no improvement is made.
+- Time Complexity: O(n^2), where n is the number of locations.
+```c++
+std::vector<std::string> twoOptSwap(const std::vector<std::string> &curr_path, int i, int j);
+```
+- Reverse the given part to generate a new path.
+- Time Complexity: O(n), where n is the number of locations.
+```c++
+std::pair<double, std::vector<std::vector<std::string>>> TravellingTrojan_3opt(
+      std::vector<std::string> &location_ids);
+```
+- Use three for loops to obtain two or three sub parts in location ids vector and reverse these sub parts. If the updated vector's path length is smaller, we update things like Brute Force one and back to start again. Repeate until no improvement is made.
+- Time Complexity： O(n^3), where n is the number of locations.
+```c++
+std::vector<std::string> threeOptSwap1(const std::vector<std::string> &curr_path, int i, int j, int k);
+```
+- Reverse three sub parts to generate a new path.
+- Time Complexity: O(n), where n is the number of locations.
+```c++
+std::vector<std::string> threeOptSwap2(const std::vector<std::string> &curr_path, int i, int j, int k);
+```
+- Reverse two sub parts to generate a new path.
+- Time Complexity: O(n), where n is the number of locations.
+```c++
+std::pair<double, std::vector<std::vector<std::string>>> TravellingTrojan_genetic;
+```
+- Create an adjacent matrix with row and columns to be locations reindexed id. Generate a random integer. Perform a for loop for the given random integer times. Each time generate a random path and adjust this path to get the local optimal path. For each loop when we get a better path, we will push back this path to our final result. Get the best path that has the minimum cost during the for loop.
+- Time Complexity: Polynomial time.
+```c++
+int rand_num(int start, int end);
+```
+- Return a random integer from [start, end).
+- Time Complexity: O(1);
+```c++
+std::vector<int> TrojanMap::get_random_path(int n);
 ```
