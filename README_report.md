@@ -45,8 +45,8 @@ std::vector<std::string> GetNeighborIDs(std::string id);
 - Given the location's name, return its neighbors.
 - Time Complexity: O(1).
 
-### The Travelling Trojan Problem (AKA Traveling Salesman!)
-## Functions
+## Step 4: The Travelling Trojan Problem (AKA Traveling Salesman!)
+### Functions
 ```c++
 std::pair<double, std::vector<std::vector<std::string>>> TravellingTrojan(
       std::vector<std::string> &location_ids);
@@ -91,7 +91,7 @@ std::vector<std::string> threeOptSwap2(const std::vector<std::string> &curr_path
 std::pair<double, std::vector<std::vector<std::string>>> TravellingTrojan_genetic;
 ```
 - Create an adjacent matrix with row and columns to be locations reindexed id. Generate a random integer. Perform a for loop for the given random integer times. Each time generate a random path and adjust this path to get the local optimal path. For each loop when we get a better path, we will push back this path to our final result. Get the best path that has the minimum cost during the for loop.
-- Time Complexity: Polynomial time.
+- Time Complexity: O(n^3), where n is the number of locations.
 ```c++
 int rand_num(int start, int end);
 ```
@@ -100,5 +100,44 @@ int rand_num(int start, int end);
 - Time Complexity: O(1).
 
 ```c++
-std::vector<int> TrojanMap::get_random_path(int n);
+std::vector<int> get_random_path(int n);
 ```
+- Generate a random path.
+- Time Complexity: O(n), where n is the number of locations.
+```c++
+double adjust_path(std::vector<int> &path, std::vector<std::vector<double>> &adjMatrix)；
+```
+- Find the best path under the circumstance of the given random path by swapping two nodes.
+- Time Complexity: O(n^2), where n is the number of locations.
+```c++
+bool can_swap(std::vector<int> &path, int i, int j, std::vector<std::vector<double>> &adjMatrix);
+```
+- Compute whether the original path or the updated path has the lower cost. If it is the original path, return false, else, return true.
+- Time Complexity: O(1).
+```c++
+double adjacent_cost(std::vector<int> &path, int i, int j, std::vector<std::vector<double>> &adjMatrix);
+```
+- Return Cost of AdjMatrix[path[i - 1]][j] + AdjMatrix[j][path[i + 1]].
+- Time Complexity: O(1).
+
+## Step 5: Cycle Detection
+### Functions
+```c++
+bool CycleDetection(std::vector<double> &square);
+```
+- Create a map visited that has all nodes in the given area and another map predecessor the child node and its parent node. Traverse all nodes in the visited map. If the node has not been visited, go to the hasCycle function. If has Cyclefunction return true, use predecessor map to plot cycle and return true.
+- Time Complexity: O(n + m), where n is the number of nodes in the map and m is the number of edges in the given area.
+```c++
+bool TrojanMap::hasCycle(std::string &start, std::string current_id, std::map<std::string, bool>&visited, std::string parent_id, std::vector<double>&square, std::map<std::string, std::string> &map_predecessor);
+```
+- Mark current node as true in visited map. Traverse curent node's neighbor nodes and record current node as predecessor node of these neighbor nodes. If the neighbor is in area and it has not been visited, do recursive function. If the neighbor is in area and it has been visited and it is not the parent node, that means there exists a cycle. Then we return true. Else, we return false.
+- Time Complexity: O(n + m), where n is the number of nodes in the given area, m is the number of edges in the given area.
+
+## Step 6: Topological Sort
+### Function
+```c++
+std::vector<std::string> DeliveringTrojan(std::vector<std::string> &locations,
+                                                     std::vector<std::vector<std::string>> &dependencies);
+```
+- Create a map Indegrees and a map adjacent matrix. Traverse all location and dependency to fill the adjacent matrix and indegrees. If the location has one dependency on another location, this location's indegree will plus one. Traverse all locations, if the location's indegree is 0, we push back this location into our deque. Then do BFS, pop the front location, push back that location into our vector result and traverse its dependencies. Make the dependent location's indegrees minus one. Each time when the location's indegrees become zero, we push back that location into our deque. Do this loop until the deque is empty. Finally, we will return the vector result, which is our topological sort path.
+- Time Complexity: O(n + m), where n is the number of locations, m is the number of edges of the given graph.
