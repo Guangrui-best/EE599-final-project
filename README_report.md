@@ -164,7 +164,7 @@ double adjacent_cost(std::vector<int> &path, int i, int j, std::vector<std::vect
 <p align="center"><img src="img/3-OPT_9.gif" alt="TSP videos" width="500"/></p>
 #### Genetic Algorithm
 <p align="center"><img src="img/genetic_9.png" alt="Trojan" width="500" /></p>
-<p align="center"><img src="img/genetic_9_9.gif" alt="TSP videos" width="500"/></p>
+<p align="center"><img src="img/genetic_9.gif" alt="TSP videos" width="500"/></p>
 
 ## Step 5: Cycle Detection
 ### Functions
