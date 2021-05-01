@@ -50,7 +50,10 @@ double GetLon(std::string id);
 
 ## Step 3: CalculateShortestPath between two places
 ### Design
-
+- Dijkstra
+<p align="center"><img src="img/Dijkstra_desgin.png" alt="Trojan" width="500" /></p>
+- Bellman-Ford
+<p align="center"><img src="img/Bellman-Ford_desgin.png" alt="Trojan" width="500" /></p>
 ### Functions:
 ```c++
 std::vector<std::string> CalculateShortestPath_Dijkstra(std::string &location1_name,
