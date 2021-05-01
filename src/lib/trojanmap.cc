@@ -275,8 +275,8 @@ void TrojanMap::PrintMenu() {
     else
       dependencies = ReadDependenciesFromCSVFile(dependencies_filename);
 
-    // std::vector<std::string> location_names = {"Cardinal Gardens", "Coffee Bean1","CVS"};
-    // std::vector<std::vector<std::string>> dependencies = {{"Coffee Bean1","Cardinal Gardens"}, {"CVS","Cardinal Gardens"}, {"CVS","Coffee Bean1"}};
+    // location_names = {"Bank of America","Ralphs","CVS"};
+    // dependencies = {{"CVS","Bank of America"}, {"Bank of America","Ralphs"}, {"CVS","Ralphs"}};
     auto start = std::chrono::high_resolution_clock::now();
     auto result = DeliveringTrojan(location_names, dependencies);
     auto stop = std::chrono::high_resolution_clock::now();
