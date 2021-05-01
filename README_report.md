@@ -78,11 +78,13 @@ std::vector<std::string> GetNeighborIDs(std::string id);
 #### Dijkstra
 <p align="center"><img src="img/Dijkstra.png" alt="Trojan" width="500" /></p>
 <p align="center"><img src="img/Calculate_Shortest_Path.png" alt="Trojan" width="500" /></p>
+
 #### Bellman-Ford
 <p align="center"><img src="img/Bellman-Ford.png" alt="Trojan" width="500" /></p>
 <p align="center"><img src="img/Calculate_Shortest_Path.png" alt="Trojan" width="500" /></p>
 
 As the pictures shown above, for the shortest path from Ralphs to Target, Dijkstra cost 0.44 seconds and Bellman-Ford cost 42.51 seconds.
+
 ## Step 4: The Travelling Trojan Problem (AKA Traveling Salesman!)
 ### Functions
 ```c++
