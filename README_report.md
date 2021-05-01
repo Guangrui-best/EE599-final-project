@@ -86,6 +86,19 @@ std::vector<std::string> GetNeighborIDs(std::string id);
 As the pictures shown above, for the shortest path from Ralphs to Target, Dijkstra cost 0.44 seconds and Bellman-Ford cost 42.51 seconds.
 
 ## Step 4: The Travelling Trojan Problem (AKA Traveling Salesman!)
+### Design
+- Brute Force
+<p align="center"><img src="img/BruteForce_design.png" alt="Trojan" width="500" /></p>
+
+- 2-OPT
+<p align="center"><img src="img/2-OPT_design.png" alt="Trojan" width="500" /></p>
+
+- 3-OPT
+<p align="center"><img src="img/3-OPT_design.png" alt="Trojan" width="500" /></p>
+
+- Genetic Algorithm
+<p align="center"><img src="img/genetic_design.png" alt="Trojan" width="500" /></p>
+
 ### Functions
 ```c++
 std::pair<double, std::vector<std::vector<std::string>>> TravellingTrojan(
@@ -174,6 +187,9 @@ double adjacent_cost(std::vector<int> &path, int i, int j, std::vector<std::vect
 <p align="center"><img src="img/genetic_9.gif" alt="TSP videos" width="500"/></p>
 
 ## Step 5: Cycle Detection
+### Design
+<p align="center"><img src="img/CycleDetection_design.png" alt="Trojan" width="500" /></p>
+
 ### Functions
 ```c++
 bool CycleDetection(std::vector<double> &square);
@@ -190,12 +206,15 @@ bool TrojanMap::hasCycle(std::string &start, std::string current_id, std::map<st
 <p align="center"><img src="img/CycleDetection_map.png" alt="TSP videos" width="500"/></p>
 
 ## Step 6: Topological Sort
+### Design
+<p align="center"><img src="img/topologicalSort_design.png" alt="Trojan" width="500" /></p>
+
 ### Function
 ```c++
 std::vector<std::string> DeliveringTrojan(std::vector<std::string> &locations,
                                                      std::vector<std::vector<std::string>> &dependencies);
 ```
-- Create a map Indegrees and a map adjacent matrix. Traverse all location and dependency to fill the adjacent matrix and indegrees. If the location has one dependency on another location, this location's indegree will plus one. Traverse all locations, if the location's indegree is 0, we push back this location into our deque. Then do BFS, pop the front location, push back that location into our vector result and traverse its dependencies. Make the dependent location's indegrees minus one. Each time when the location's indegrees become zero, we push back that location into our deque. Do this loop until the deque is empty. Finally, we will return the vector result, which is our topological sort path.
+- Create a map Indegrees and a map adjacent matrix. Traverse all location and dependency to fill the adjacent matrix and indegrees. If the location has one dependency on another location, this location's indegree will plus one. Traverse all locations, if the location's indegree is 0, we push back this location into our deque. Then do BFS, pop the front location, push back that location into our vector result and traverse its dependencies. Minus the dependent location's indegrees by one. Each time when the location's indegrees become zero, we push back that location into our deque. Do this loop until the deque is empty. Finally, we will return the vector result, which is our topological sort path.
 - Time Complexity: O(n + m), where n is the number of locations, m is the number of edges of the given graph.
 ### Implementation
 <p align="center"><img src="img/topologicalSort.png" alt="Trojan" width="500" /></p>
