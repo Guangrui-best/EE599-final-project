@@ -191,3 +191,5 @@ std::vector<std::string> DeliveringTrojan(std::vector<std::string> &locations,
 - Create a map Indegrees and a map adjacent matrix. Traverse all location and dependency to fill the adjacent matrix and indegrees. If the location has one dependency on another location, this location's indegree will plus one. Traverse all locations, if the location's indegree is 0, we push back this location into our deque. Then do BFS, pop the front location, push back that location into our vector result and traverse its dependencies. Make the dependent location's indegrees minus one. Each time when the location's indegrees become zero, we push back that location into our deque. Do this loop until the deque is empty. Finally, we will return the vector result, which is our topological sort path.
 - Time Complexity: O(n + m), where n is the number of locations, m is the number of edges of the given graph.
 ### Implementation
+<p align="center"><img src="img/topologicalSort.png" alt="Trojan" width="500" /></p>
+<p align="center"><img src="img/topologicalSort_map.png" alt="TSP videos" width="500"/></p>
