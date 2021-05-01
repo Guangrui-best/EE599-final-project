@@ -172,13 +172,14 @@ void TrojanMap::PrintMenu() {
     srand(time(NULL));
     for (int i = 0; i < num; i++)
       locations.push_back(keys[rand() % keys.size()]);
+    // locations = {"7424313399","5768963617","2613117895","4012842278","269637362","441895337","6805603634","2578244375","5237417650"};
     PlotPoints(locations);
     std::cout << "Calculating ..." << std::endl;
     auto start = std::chrono::high_resolution_clock::now();
-    // auto results = TravellingTrojan(locations);
+    auto results = TravellingTrojan(locations);
     // auto results = TravellingTrojan_2opt(locations);
     // auto results = TravellingTrojan_3opt(locations);
-    auto results = TravellingTrojan_genetic(locations);
+    // auto results = TravellingTrojan_genetic(locations);
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     CreateAnimation(results.second);
@@ -489,7 +490,7 @@ void TrojanMap::PlotPointsOrder(std::vector<std::string> &location_ids) {
  * @param  {std::vector<std::vector<std::string>>} path_progress : the progress to get the path
  */
 void TrojanMap::CreateAnimation(std::vector<std::vector<std::string>> path_progress){
-  cv::VideoWriter video("src/lib/output001.avi", cv::VideoWriter::fourcc('M','J','P','G'), 10, cv::Size(1248,992));
+  cv::VideoWriter video("src/lib/output.avi", cv::VideoWriter::fourcc('M','J','P','G'), 10, cv::Size(1248,992));
   for(auto location_ids: path_progress) {
     std::string image_path = cv::samples::findFile("src/lib/input.jpg");
     cv::Mat img = cv::imread(image_path, cv::IMREAD_COLOR);
@@ -1270,11 +1271,7 @@ bool TrojanMap::CycleDetection(std::vector<double> &square) {
         }
         location_ids.push_back(start);
         std::reverse(location_ids.begin(), location_ids.end());
-        // for(auto l: location_ids){
-        //   std::cout << l << std::endl;
-        // }
-        PlotPointsandEdges(location_ids, square);
-        // PlotPath(location_ids);
+        // PlotPointsandEdges(location_ids, square); // Before running GTest, you should comment this line
         return true;
       }
     }
