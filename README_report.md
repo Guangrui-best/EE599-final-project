@@ -52,6 +52,7 @@ double GetLon(std::string id);
 ### Design
 - Dijkstra
 <p align="center"><img src="img/Dijkstra_desgin.png" alt="Trojan" width="500" /></p>
+
 - Bellman-Ford
 <p align="center"><img src="img/Bellman-Ford_desgin.png" alt="Trojan" width="500" /></p>
 ### Functions:
