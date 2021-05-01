@@ -54,7 +54,8 @@ double GetLon(std::string id);
 <p align="center"><img src="img/Dijkstra_desgin.png" alt="Trojan" width="500" /></p>
 
 - Bellman-Ford
-<p align="center"><img src="img/Bellman-Ford_design.png" alt="Trojan" width="400" /></p>
+<p align="center"><img src="img/Bellman-Ford_design.png" alt="Trojan" width="300" /></p>
+
 ### Functions:
 ```c++
 std::vector<std::string> CalculateShortestPath_Dijkstra(std::string &location1_name,
