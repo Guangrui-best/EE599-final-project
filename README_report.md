@@ -219,3 +219,10 @@ std::vector<std::string> DeliveringTrojan(std::vector<std::string> &locations,
 ### Implementation
 <p align="center"><img src="img/topologicalSort.png" alt="Trojan" width="500" /></p>
 <p align="center"><img src="img/topologicalSort_map.png" alt="TSP videos" width="500"/></p>
+
+## Lessions Learned
+- It is important to use different data structure to improve the program efficiency.
+
+- Obtain experience to write many recurisive algorithms and Dijkstra, Bellman-Ford and Genetic algorithm.
+
+- Be patient and careful when designing algorithms and debugging codes.
